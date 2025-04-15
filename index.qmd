@@ -1,0 +1,15 @@
+---
+title: "Statistical simulations and demonstrations"
+author:
+  - name: Jacob Goldstein-Greenwood
+    url: https://github.com/jacob-gg
+format:
+  html:
+    code-fold: true
+    code-summary: "Show code"
+    embed-resources: true
+---
+
+This repository contains short simulations and demonstrations of statistical phenomena prompted by comments I encounter in papers, books, etc. The goal is to build a small archive of intuition prompts that help with applied statistical decision-making.
+
+- [Consequences of omitting (warranted) random slopes; based on Barr et al., 2013](https://jacob-gg.github.io/sims/barr-et-al-2013-random-slopes-keep-it-maximal)

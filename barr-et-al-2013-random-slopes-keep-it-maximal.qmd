@@ -1,0 +1,77 @@
+---
+title: '"Keep it maximal": Consequences of omitting (warranted) random slopes'
+author: "Jacob Goldstein-Greenwood"
+date: last-modified
+date-format: iso
+format:
+  html:
+    code-fold: true
+    code-summary: "Show code"
+    embed-resources: true
+---
+
+Barr et al., 2013, _Journal of Memory and Language_, "Random effects structure for confirmatory hypothesis testing: Keep it maximal." DOI: [10.1016/j.jml.2012.11.001](https://pmc.ncbi.nlm.nih.gov/articles/PMC3881361/pdf/nihms533954.pdf).
+
+> "Overall, our analysis suggests that, when specifying random effects for hypothesis testing with LMEMs, researchers have been far too concerned about _overfitting the data_, and not concerned enough about _underfitting the design_. In fact, it turns out overfitting the data with a maximal model has only minimal consequences for Type I error and power...."
+
+I simulated data in which the population-level fixed effect of a within-cluster binary predictor, `x`, was zero but in which there were non-zero random intercepts and random slopes (distributed normally around zero). I.e., there was no overall average treatment effect, but there were within-cluster differences as `x` varied.
+
+I then fit the following mixed-effects models:
+
+$$Random\ intercepts: y_{ij} = \gamma_{00} + \beta_1x_{ij} + \mu_{0j} + e_{ij}$$
+$$Random\ slopes: y_{ij} = \gamma_{00} + \beta_1x_{ij} + \mu_{0j} + \mu_{1j}x_{ij} + e_{ij}$$
+
+I repeated the data-simulation and model fitting process 1000 times, recording on each iteration the estimated standard error of the fixed effect and the (Satterthwaite-df-based) _p_ value from each model.
+
+```{r, warning=FALSE, message=FALSE}
+library(lme4)
+library(ggplot2)
+
+set.seed(999)
+
+sim <- function(n = 500, n_clust = 50,
+                ranint_sd = 1, ranslope_sd = .5,
+                e_sd = .5, b1 = 0) {
+  clust <- rep(1:n_clust, each = n/n_clust)
+  ranint <- rnorm(n_clust, mean = 0, sd = ranint_sd)[clust]
+  ranslope <- rnorm(n_clust, mean = 0, sd = ranslope_sd)[clust]
+  e <- rnorm(n, mean = 0, sd = e_sd)
+  x <- rbinom(n, size = 1, prob = .5)
+  y <- 0 + b1*x + ranint + ranslope*x + e
+  RI <- summary(lmerTest::lmer(y ~ x + (1|clust)))
+  RS <- summary(lmerTest::lmer(y ~ x + (1 + x|clust)))
+  c('RI_p' = RI$coefficients[2, 5], 'RI_SE' = RI$coefficients[2, 2],
+    'RS_p' = RS$coefficients[2, 5], 'RS_SE' = RS$coefficients[2, 2])
+}
+
+n_sims <- 1000
+
+res <- replicate(n_sims, expr = sim())
+
+FP_rates <- apply(res[c(1, 3), ], 1, \(x) mean(x < .05))
+
+SE_dat <- rbind(data.frame(type = 'RI', SE = res[2, ]),
+                data.frame(type = 'RI + RS', SE = res[4, ]))
+
+p <- ggplot(SE_dat, aes(SE, fill = type)) +
+  geom_histogram() +
+  scale_fill_manual(values = c('salmon', 'cornflowerblue')) +
+  annotate('text', x = median(res[4, ]), y = 200,
+           label = paste0('Ratio of median SEs (RI + RS / RI):\n',
+                          round(median(res[4, ])/median(res[2, ]), digits = 3))) +
+  theme(legend.position = 'bottom') +
+  labs(title = 'Standard errors estimated from LMMs for fixed effect of x',
+       fill = 'Random effects',
+       x = 'Standard error', y = 'Count',
+       caption = 'RI: Random intercepts\nRS: Random slopes')
+
+cat('False-positive rates for the fixed effect of x (alpha = .05):\n',
+    '\n\tRandom intercepts only:', FP_rates[1],
+    '\n\tRandom intercepts and random slopes:', FP_rates[2])
+
+p
+```
+
+When there was true heterogeneity in the effect of `x` between clusters, estimating models with only random slopes resulted in drastically underestimated standard errors.
+
+Barr et al. advise "includ[ing] the maximal random effects structure _justified by the design_." Practical advice relevant to this case comes from Gelman, who has pointed out that omitting terms (e.g., a random effect, an interaction of fixed effects) is still taking a position on them: It's fixing them to zero. Our task is to determine if that is actually reasonable.
