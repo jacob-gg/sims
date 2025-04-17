@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jacob Goldstein-Greenwood">
-<meta name="dcterms.date" content="2025-04-14">
+<meta name="dcterms.date" content="2025-04-17">
 
 <title>“Keep it maximal”: Consequences of omitting (warranted) random slopes</title>
 <style>
@@ -3242,7 +3242,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">2025-04-14</p>
+      <p class="date">2025-04-17</p>
     </div>
   </div>
   
@@ -3330,6 +3330,11 @@ window.Quarto = {
 </div>
 <p>When there was true heterogeneity in the effect of <code>x</code> between clusters, estimating models with only random slopes resulted in drastically underestimated standard errors.</p>
 <p>Barr et al. advise “includ[ing] the maximal random effects structure <em>justified by the design</em>.” Practical advice relevant to this case comes from Gelman, who has pointed out that omitting terms (e.g., a random effect, an interaction of fixed effects) is still taking a position on them: It’s fixing them to zero. Our task is to determine if that is actually reasonable.</p>
+<hr>
+<p><a href="https://academic.oup.com/beheco/article/20/2/416/218997">Schielzeth and Forstmeier (2009)</a> described this problem and made a helpful distinction between models targeting predictors that vary between-cluster versus models targeting predictors that vary within-cluster:</p>
+<blockquote class="blockquote">
+<p>…in a study of differential allocation, [female zebra finches] are paired experimentally to either attractive or unattractive [male zebra finches <a href="https://royalsocietypublishing.org/doi/10.1098/rspb.2008.1251">(Bolund et al., 2009)</a>]. They are allowed to produce a clutch, and egg sizes are measured for all eggs. When the interest is to estimate the effect of the treatment (attractive vs. unattractive male) on mean egg size, it is sufficient to include individual-specific random intercept effects, that is, allowing females to differ in their mean egg sizes and hence intercepts. This will effectively control for the nonindependence of eggs coming from the same female when the factor of interest, the treatment, is applied to some of the females. However, many studies also focused on how the treatment affects the patterns of female investment over the laying sequence within a clutch. In this case, a model that controls for individual-specific intercepts only, but not for individual-specific slopes of investment (of egg size over the laying sequence), will greatly underestimate the <em>P</em> value of 1) the slope main effect and 2) the treatment by laying order interaction, leading to many false-positive findings.</p>
+</blockquote>
 
 </main>
 <!-- /main column -->
